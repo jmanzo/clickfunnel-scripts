@@ -1,0 +1,66 @@
+<script>
+	/**
+	*	Custom Script to get total purchased on confirmation page
+	*	By Jean Manzo https://jdevm.com
+	*/
+	$(function() {
+
+		var total = 0;
+		var totalShipping = 0;
+		var shippingContainer = '';
+		
+		/**
+		*	Resuming Shipping and Handling rates on total
+		*/
+		$('[data-product-id="2110258"]').each(buildShippingTotal);
+
+		function buildShippingTotal() {
+			totalShipping += parseFloat($(this).find('.elOrderProductOptinPrice').text().replace('$', ''));
+
+			shippingContainer = (`
+				<div class="elOrderProductOptinProducts">
+					<div class="pull-left elOrderProductOptinProductName">
+						<div class="occProductName">Shipping & Handling:</div>
+					</div>
+					<div id="shipping_and_handling" class="pull-right elOrderProductOptinPrice">$${totalShipping.toFixed(2)}</div>
+				</div>
+			`);
+
+			$(this).remove();
+		}
+
+		setTimeout(function(){
+			var totalNumber = parseFloat($('#shipping_and_handling').text().replace('$', ''));
+			var prevNumber = parseFloat($('[data-product-id="2103167"]').find('.elOrderProductOptinPrice').text().replace('$', ''));
+
+			totalNumber += prevNumber;
+
+			console.log('totalNumber:', totalNumber);
+
+			$('#shipping_and_handling').text('$'+totalNumber);
+
+			$('[data-product-id="2103167"]').remove();
+		}, 2000);
+
+		// Add the shipping container to the table
+		$('.cart-box').append(shippingContainer);
+
+		$('.elOrderProductOptinPrice').each(function(){
+			total += parseFloat($(this).text().replace('$', ''));
+		})
+
+		var selector = (`
+			<hr class="cf-purchase-divider">
+			<div class="elOrderProductOptinProducts">
+				<div class="pull-left elOrderProductOptinProductName">
+					<div class="occProductName"><strong>Total:</strong></div>
+				</div>
+				<div class="pull-right elOrderProductOptinPrice"><strong>$${total.toFixed(2)}<strong/></div>
+			</div>
+		`);
+		
+		$('.cart-box').append(selector);
+
+
+	})
+</script>

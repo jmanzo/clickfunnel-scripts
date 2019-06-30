@@ -1,0 +1,72 @@
+<script>
+	/**
+	*	Clickfunnel: Script to transform the input radios to dropdown - by Jean Manzo https://jdevm.com
+	*/
+	$(document).ready(function(){
+		var $productOptionsContainer = $(".elOrderProductOptions:nth-of-type(1)");
+		var $newContentMapped;
+		var $newElementContainer;
+		
+		// we work over the new DOM replaced
+		$newContentMapped = $productOptionsContainer.find('.elOrderProductOptinProducts').map( function( index, element ) {
+			$(element).hide();
+			var $elOrderProductOptinProductName = $(element).find('.elOrderProductOptinProductName');
+			var $inputRadio = $elOrderProductOptinProductName.find('input[type="radio"]');
+			var productLabel = $elOrderProductOptinProductName.find('label[data-cf-product-name="true"]').text();
+			
+			if ( $inputRadio.attr('id') != undefined ) {
+				var newInputContent = (`
+					<label for="${ $inputRadio.attr('id') }">
+						${ productLabel } 
+						${ $inputRadio.attr('data-product-currency-code') }${ $inputRadio.attr('data-product-amount') }
+				      	<input 
+				      		type="radio"
+				      		value="${ $inputRadio.attr('id') }"
+				      		data-product-label="${ $inputRadio.attr('data-product-label') }"
+				      	/>
+				    </label>
+				`);
+			}
+			
+		    return newInputContent;
+		}).get();
+
+		$newElementContainer = (`
+			<div class="dropp">
+				<div class="dropp-header">
+				    <span class="dropp-header__title js-value">Size</span> 
+				    <a href="#" class="dropp-header__btn js-dropp-action">
+				      <i class="icon"></i>
+				   	</a> 
+				</div>
+				<div class="dropp-body">${ $newContentMapped }</div>
+			</div>
+		`);
+
+		$productOptionsContainer.prepend( $newElementContainer.replace(/,/g, '') );
+
+		// Default dropdown action to show/hide dropdown content
+	  	$('.js-dropp-action').click(function(e) {
+	    	e.preventDefault();
+	    	$(this).toggleClass('js-open');
+	    	$(this).parent().next('.dropp-body').toggleClass('js-open');
+	  	});
+
+	  	// Using as fake input select dropdown
+	  	$('.dropp .dropp-body label').click(function() {
+	  		var selectedValue = $(this).find('input[type="radio"]').attr('data-product-label');
+
+	  		$('.js-value').text(selectedValue);
+
+	    	$(this).addClass('js-open').siblings().removeClass('js-open');
+	    	$('.dropp-body,.js-dropp-action').removeClass('js-open');
+
+	    	$(`input#${ $(this).find('input[type="radio"]').val() }`).parent().parent().click();
+	    	$(`input#${ $(this).find('input[type="radio"]').val() }`).parent().parent().hide();
+	  	});
+
+	  	// Make shipping cost selected by default
+	  	$('.orderFormBump.elVisible .sectioncontent > div > label.checkbox').click();
+	  	$('.orderFormBump.elVisible .sectioncontent > div > label.checkbox').hide();
+	})
+</script>

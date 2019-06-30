@@ -1,0 +1,107 @@
+<script>
+	/**
+	*	Custom Script to get a list of products with quantity options in the Upsell 
+	*	By Jean Manzo https://jdevm.com
+	*/
+	$(function(){
+		var start = 0;
+		var stop = 10; // Set a limit for the product's quantity
+		// How many products you have, separated each one by comma (,)
+		const products = { 
+			'PRODUCT_ID': 'PRODUCT_NAME'
+		};
+		// Set PRODUCT_ID to the product number ID. Ex 1234567
+		// You can set each one separated by comma (,)
+		var shippingHandle = {
+			'PRODUCT_ID_qty': 0
+		};
+		// You can set a shipping cost as a product in your funnel. Set the PRODUCT_ID for that product.
+		const shippingCostProduct = 'PRODUCT_SHIPPING_ID';
+
+		$('[name="purchase[product_id]"]').remove();
+
+		$.each(products, function(index, product_name) {
+			var id = `pid-${index}`;
+			var val = index;
+
+			var $productRows = (`
+				<div class="product_rows">
+					<select 
+						id="${val}_qty" 
+						name="${val}_qty" 
+						class="qty_select" 
+						data-product-id="${val}"
+					></select>
+					<p>${product_name}</p>
+				</div>
+			`);
+
+			$('#qty_container').append( $productRows );
+
+			for (i = start; i <= stop; i++) {
+				$(`#${val}_qty`).append( $('<option/>', { value: i, text: i }) );
+			}
+		});
+
+
+		// Add the Shipping & Handling option
+		if ( shippingCostProduct !== '' ) {
+			$('#qty_container').append($('<input/>', {
+				id: shippingCostProduct + '_qty',
+				type: 'hidden',
+				name: shippingCostProduct + '_qty',
+				class: 'qty_select',
+				"data-product-id": shippingCostProduct
+			}));
+		}
+
+
+		// Assign a total value when the value is changed
+		$('.qty_select').change(function() {
+			var total_shipping_qty;
+
+			shippingHandle[this.id] = parseFloat($(this).val());
+			total_shipping_qty = shippingAndHandlingTotal(shippingHandle);
+			$('#' + shippingCostProduct + '_qty').val(total_shipping_qty);
+		});
+
+
+		function shippingAndHandlingTotal(obj) {
+			var total_shipping = 0;
+
+			$.each(obj, function(index, value){
+				if (value > 0) {
+					total_shipping += value;
+				}
+			});
+
+			return total_shipping;
+		}
+
+
+		$('#BTN_SELECTOR').click(function(){
+			$('#cfAR [name="purchase[product_ids][]"]').remove();
+
+			$('.qty_select').each(function(){
+				var qty = $(this).val();
+				var cartProd = $('<input/>', {
+					type: "checkbox",
+					name: 'purchase[product_ids][]',
+					"data-storage": false,
+					checked: true
+				});
+					
+				var prodId = this.id.split('_')[0];
+
+				$('[name="purchase[product_ids][]"] [value="'+prodId+'"]').remove();
+
+				cartProd = $(cartProd).val(prodId).attr('checked', true);
+
+				for (var j = 0; j < qty; j++) {
+					$('#cfAR').append($(cartProd).clone());
+				}
+			});
+		});
+
+	})
+</script>
